@@ -1,7 +1,6 @@
 const express = require("express")
-const nodemon = require("nodemon")
 const dotenv = require("dotenv")
-const {Pool} = require("pg")
+const usersRouter = require("./routes/users")
 
 //Load env variables
 dotenv.config()
@@ -9,17 +8,21 @@ dotenv.config()
 const app = express()
 app.use(express.json())
 
-//Postgresql connection
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-})
 
 //Home route
-app.get('/', async (req, res) => {
+app.get('/api/v1', async (req, res) => {
   return res.send('Postgresql is connected')
+})
+
+app.use('/api/v1/users', usersRouter);
+
+//404 handler for unknown routes
+app.use((req, res) => {
+  res.status(404).json({ success: false, error: 'Route not found' });
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 })
 
